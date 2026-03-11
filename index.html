@@ -1,0 +1,39 @@
+<!--
+1. Put 'audio.mp3' in the same folder as this file
+2. Deploy the folder to Netlify
+3. Generate a QR code that points to your deployed page URL
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Echoes of the Hollow</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="background-glow"></div>
+  <main class="hero-container">
+    <section class="hero-card">
+      <h1 class="title">Echoes of the Hollow</h1>
+      <h2 class="tagline">A graphic novel of mystery, memory, and ruin.</h2>
+      <p class="description">Step into a haunting world of buried truths, forgotten promises, and the voices that linger long after the end.</p>
+      <div class="audio-player" id="audio-player">
+        <button id="play-pause" aria-label="Play audio">▶</button>
+        <div class="progress-container" id="progress-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <span class="time" id="current-time">0:00</span> /
+        <span class="time" id="duration">0:00</span>
+      </div>
+      <div class="links">
+        <a href="#" class="btn" id="instagram">Instagram</a>
+        <a href="#" class="btn" id="website">Website</a>
+        <a href="#" class="btn" id="support">Support the Project</a>
+      </div>
+    </section>
+    <footer class="footer-note">Thank you for visiting our booth</footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
