@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Graceful error handling if audio is missing
   audio.addEventListener('error', function () {
     playPauseBtn.disabled = true;
-    playPauseBtn.textContent = '✖';
+    playPauseBtn.innerHTML = '<span style="font-size:1.2em;">✖</span>';
     playPauseBtn.title = 'Audio unavailable';
     progressBar.style.background = '#555';
     durationEl.textContent = '0:00';
@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', function () {
     durationEl.textContent = formatTime(duration);
   });
 
+  // SVG icons for play/pause
+  const playIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;"><polygon points="6,4 20,12 6,20"/></svg>';
+  const pauseIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+  // Set initial icon
+  playPauseBtn.innerHTML = playIcon;
+
   // Play/pause toggle
   playPauseBtn.addEventListener('click', function () {
     if (audio.paused) {
@@ -61,21 +68,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   audio.addEventListener('play', function () {
     isPlaying = true;
-    playPauseBtn.textContent = '⏸';
+    playPauseBtn.innerHTML = pauseIcon;
     playPauseBtn.setAttribute('aria-label', 'Pause audio');
     animationFrame = requestAnimationFrame(updateProgress);
   });
 
   audio.addEventListener('pause', function () {
     isPlaying = false;
-    playPauseBtn.textContent = '▶';
+    playPauseBtn.innerHTML = playIcon;
     playPauseBtn.setAttribute('aria-label', 'Play audio');
     cancelAnimationFrame(animationFrame);
   });
 
   audio.addEventListener('ended', function () {
     isPlaying = false;
-    playPauseBtn.textContent = '▶';
+    playPauseBtn.innerHTML = playIcon;
     playPauseBtn.setAttribute('aria-label', 'Play audio');
     progressBar.style.width = '0%';
     currentTimeEl.textContent = '0:00';
