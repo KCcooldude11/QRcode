@@ -172,11 +172,42 @@ html, body {
   border-radius: var(--audio-bar-radius);
   cursor: pointer;
   position: relative;
-  overflow: hidden;
   min-width: 90px;
   max-width: 200px;
   margin: 0 0.5em;
   box-shadow: 0 1px 6px 0 #7f5af022;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--audio-bar-fill);
+  border-radius: var(--audio-bar-radius);
+  width: 0%;
+  transition: width 0.2s linear;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.progress-handle {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 1.1em;
+  height: 1.1em;
+  background: #fff;
+  border: 2px solid var(--audio-bar-fill);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px 0 #b3003c33;
+  transform: translate(-50%, -50%);
+  transition: border-color 0.2s;
+  z-index: 2;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.progress-handle:active {
+  border-color: #fff;
 }
 
 .progress-bar {

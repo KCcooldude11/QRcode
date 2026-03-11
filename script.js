@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const playPauseBtn = document.getElementById('play-pause');
   const progressContainer = document.getElementById('progress-container');
   const progressBar = document.getElementById('progress-bar');
+  const progressHandle = document.getElementById('progress-handle');
   const currentTimeEl = document.getElementById('current-time');
   const durationEl = document.getElementById('duration');
 
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let isPlaying = false;
   let duration = 0;
   let animationFrame;
+  let isDragging = false;
 
   // Graceful error handling if audio is missing
   audio.addEventListener('error', function () {
@@ -39,6 +41,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!isNaN(audio.duration)) {
       const percent = (audio.currentTime / audio.duration) * 100;
       progressBar.style.width = percent + '%';
+      if (!isDragging) {
+        progressHandle.style.left = percent + '%';
+      }
       currentTimeEl.textContent = formatTime(audio.currentTime);
     }
     animationFrame = requestAnimationFrame(updateProgress);
@@ -94,10 +99,72 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!isNaN(audio.duration)) {
       const rect = progressContainer.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const percent = x / rect.width;
+      const percent = Math.max(0, Math.min(1, x / rect.width));
       audio.currentTime = percent * audio.duration;
       updateProgress();
     }
+  });
+
+  // Drag handle logic
+  progressHandle.addEventListener('mousedown', function (e) {
+    if (isNaN(audio.duration)) return;
+    isDragging = true;
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (!isDragging) return;
+    const rect = progressContainer.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    x = Math.max(0, Math.min(rect.width, x));
+    const percent = x / rect.width;
+    progressBar.style.width = percent * 100 + '%';
+    progressHandle.style.left = percent * 100 + '%';
+    currentTimeEl.textContent = formatTime(percent * audio.duration);
+  });
+
+  document.addEventListener('mouseup', function (e) {
+    if (!isDragging) return;
+    const rect = progressContainer.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    x = Math.max(0, Math.min(rect.width, x));
+    const percent = x / rect.width;
+    audio.currentTime = percent * audio.duration;
+    isDragging = false;
+    document.body.style.userSelect = '';
+    updateProgress();
+  });
+
+  // Touch support for mobile
+  progressHandle.addEventListener('touchstart', function (e) {
+    if (isNaN(audio.duration)) return;
+    isDragging = true;
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function (e) {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    const rect = progressContainer.getBoundingClientRect();
+    let x = touch.clientX - rect.left;
+    x = Math.max(0, Math.min(rect.width, x));
+    const percent = x / rect.width;
+    progressBar.style.width = percent * 100 + '%';
+    progressHandle.style.left = percent * 100 + '%';
+    currentTimeEl.textContent = formatTime(percent * audio.duration);
+  }, { passive: false });
+
+  document.addEventListener('touchend', function (e) {
+    if (!isDragging) return;
+    const rect = progressContainer.getBoundingClientRect();
+    let x = (e.changedTouches[0] || e.touches[0]).clientX - rect.left;
+    x = Math.max(0, Math.min(rect.width, x));
+    const percent = x / rect.width;
+    audio.currentTime = percent * audio.duration;
+    isDragging = false;
+    document.body.style.userSelect = '';
+    updateProgress();
   });
 
   // Optional: Keyboard accessibility for play/pause
