@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const durationEl = document.getElementById('duration');
 
   // Create audio element
-  const audio = new Audio('audio.mp3');
+  const audio = new Audio('Capstone_Cinematic_Audio.mp3');
   let isPlaying = false;
   let duration = 0;
   let animationFrame;
