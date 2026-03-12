@@ -11,12 +11,56 @@ document.addEventListener('DOMContentLoaded', function () {
   const currentTimeEl = document.getElementById('current-time');
   const durationEl = document.getElementById('duration');
 
+  // Glowing background element
+  const backgroundGlow = document.querySelector('.background-glow');
+
   // Create audio element
   const audio = new Audio('Capstone_Cinematic_Audio.mp3');
   let isPlaying = false;
   let duration = 0;
   let animationFrame;
   let isDragging = false;
+
+  // Web Audio API setup for volume pulsing
+  let audioContext, sourceNode, analyser, dataArray, animationFramePulse;
+  function setupAudioContext() {
+    if (audioContext) return; // Only set up once
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioContext.createMediaElementSource(audio);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.fftSize);
+    sourceNode.connect(analyser);
+    analyser.connect(audioContext.destination);
+  }
+
+  function getVolume() {
+    analyser.getByteTimeDomainData(dataArray);
+    // Calculate root mean square (RMS) for overall volume
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      let val = (dataArray[i] - 128) / 128;
+      sum += val * val;
+    }
+    return Math.sqrt(sum / dataArray.length);
+  }
+
+  function pulseGlow() {
+    if (!isPlaying) return;
+    const volume = getVolume();
+    // Debug: log volume and mapped value
+    console.log('Volume:', volume);
+    // Make the effect even more obvious for debugging
+    const minScale = 0.5, maxScale = 2.2;
+    const minOpacity = 0.3, maxOpacity = 1.0;
+    const mapped = Math.min(volume * 4, 1); // exaggerate response
+    const scale = minScale + (maxScale - minScale) * mapped;
+    const opacity = minOpacity + (maxOpacity - minOpacity) * mapped;
+    backgroundGlow.style.transition = 'transform 0.12s cubic-bezier(.4,0,.2,1), opacity 0.12s cubic-bezier(.4,0,.2,1)';
+    backgroundGlow.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    backgroundGlow.style.opacity = String(opacity);
+    animationFramePulse = requestAnimationFrame(pulseGlow);
+  }
 
   // Graceful error handling if audio is missing
   audio.addEventListener('error', function () {
@@ -65,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Play/pause toggle
   playPauseBtn.addEventListener('click', function () {
     if (audio.paused) {
+        setupAudioContext();
       audio.play();
     } else {
       audio.pause();
@@ -76,6 +121,10 @@ document.addEventListener('DOMContentLoaded', function () {
     playPauseBtn.innerHTML = pauseIcon;
     playPauseBtn.setAttribute('aria-label', 'Pause audio');
     animationFrame = requestAnimationFrame(updateProgress);
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      animationFramePulse = requestAnimationFrame(pulseGlow);
   });
 
   audio.addEventListener('pause', function () {
@@ -83,6 +132,10 @@ document.addEventListener('DOMContentLoaded', function () {
     playPauseBtn.innerHTML = playIcon;
     playPauseBtn.setAttribute('aria-label', 'Play audio');
     cancelAnimationFrame(animationFrame);
+     cancelAnimationFrame(animationFramePulse);
+     // Reset glow
+     backgroundGlow.style.transform = 'translate(-50%, -50%) scale(1)';
+     backgroundGlow.style.opacity = '0.7';
   });
 
   audio.addEventListener('ended', function () {
@@ -92,6 +145,9 @@ document.addEventListener('DOMContentLoaded', function () {
     progressBar.style.width = '0%';
     currentTimeEl.textContent = '0:00';
     cancelAnimationFrame(animationFrame);
+     cancelAnimationFrame(animationFramePulse);
+     backgroundGlow.style.transform = 'translate(-50%, -50%) scale(1)';
+     backgroundGlow.style.opacity = '0.7';
   });
 
   // Seek on progress bar click
